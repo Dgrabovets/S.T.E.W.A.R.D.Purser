@@ -18,7 +18,7 @@ DOGE = Instrument("DOGEUSDT", price=D("0.2"), min_qty=D("1"), qty_step=D("1"), m
 # Позиция, которую биржа показывает после ордера из теста: 152 это 7,5% от 40,63 USDT при стопе 0,02
 OPENED = Position("DOGEUSDT", SideEnum.LONG, D("152"), D("0.2"), stop=D("0.18"), liquidation=D("0.05"))
 
-# Настройки теста: запаса на проскальзывание нет, проверки позиции быстрые
+# Настройки теста: запаса на проскальзывание нет (нижняя граница из `limits.py` в тесте снята), проверки позиции быстрые
 SETTINGS = {"PURSER_SLIPPAGE_RESERVE": "0", "PURSER_RECONCILE_ATTEMPTS": "2", "PURSER_RECONCILE_PAUSE_SECONDS": "0"}
 
 
@@ -40,6 +40,7 @@ class ExecutionTestCase(unittest.TestCase):
         mock.patch.object(execution.bybit_public, "linear_perpetuals", return_value=[DOGE]).start()
         mock.patch.object(state.settings, "state_dir", return_value=Path(folder.name)).start()
         mock.patch.dict(os.environ, SETTINGS).start()
+        mock.patch.object(limits, "MIN_SLIPPAGE_RESERVE", D("0")).start()
         mock.patch.object(execution.time, "sleep").start()
         mock.patch("builtins.print").start()
 

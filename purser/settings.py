@@ -7,6 +7,8 @@ import os
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from purser import limits
+
 # Корень проекта: рядом лежит `.env`, от него считается относительный путь папки истории
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -180,8 +182,11 @@ def slippage_reserve() -> Decimal:
 
     Returns:
         Доля от цены: 0.003 это 0,3%, вход считается хуже рыночной цены на эту долю
+
+    Raises:
+        ValueError: Запас меньше `limits.MIN_SLIPPAGE_RESERVE`: нижняя граница это лимит риска и живёт в `limits.py`
     """
-    return _decimal("PURSER_SLIPPAGE_RESERVE", "0.003", Decimal(0))
+    return _decimal("PURSER_SLIPPAGE_RESERVE", "0.003", limits.MIN_SLIPPAGE_RESERVE)
 
 
 def reconcile_attempts() -> int:

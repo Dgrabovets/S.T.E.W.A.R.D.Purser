@@ -48,7 +48,7 @@ Purser значит «казначей». Проект входит в лине�
 | `PURSER_API_KEY`, `PURSER_API_SECRET` | нет | Демо-ключ Bybit: чтение и торговля, без вывода |
 | `PURSER_TRADE_URL` | `https://api-demo.bybit.com` | Адрес приватных запросов, принимается только демо |
 | `PURSER_STATE_DIR` | `state` | Папка состояния: пик депозита и флаг kill-switch |
-| `PURSER_SLIPPAGE_RESERVE` | `0.003` | Запас на проскальзывание и комиссии при расчёте размера, доля от цены |
+| `PURSER_SLIPPAGE_RESERVE` | `0.003` | Запас на проскальзывание и комиссии при расчёте размера, доля от цены. Ниже `MIN_SLIPPAGE_RESERVE` из `limits.py` (0,2%) не принимается |
 | `PURSER_RECONCILE_ATTEMPTS`, `PURSER_RECONCILE_PAUSE_SECONDS` | `5`, `1` | Сколько раз и с какой паузой проверять позицию на бирже после ордера |
 | `PURSER_ATTEMPTS` | `3` | Попыток запроса при временной ошибке |
 | `PURSER_RETRY_PAUSE_SECONDS` | `2` | Пауза между попытками, секунды |

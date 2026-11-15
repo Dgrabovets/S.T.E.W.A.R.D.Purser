@@ -7,7 +7,7 @@ from decimal import Decimal as D
 from pathlib import Path
 from unittest import mock
 
-from purser import settings
+from purser import limits, settings
 
 
 class SettingsTests(unittest.TestCase):
@@ -50,6 +50,17 @@ class SettingsTests(unittest.TestCase):
                             ("PURSER_MAX_SPREAD", "NaN"), ("PURSER_INTERVALS", "60,,240")):
             with mock.patch.dict(os.environ, {name: value}), self.assertRaisesRegex(ValueError, name):
                 getters[name]()
+
+    def test_slippage_reserve_cannot_go_below_limit(self) -> None:
+        """Запас на проскальзывание ниже нижней границы из `limits.py` отклоняется, равный границе и выше проходит"""
+        with mock.patch.dict(os.environ, {"PURSER_SLIPPAGE_RESERVE": "0"}), self.assertRaisesRegex(ValueError, "PURSER_SLIPPAGE_RESERVE"):
+            settings.slippage_reserve()
+
+        with mock.patch.dict(os.environ, {"PURSER_SLIPPAGE_RESERVE": str(limits.MIN_SLIPPAGE_RESERVE)}):
+            self.assertEqual(settings.slippage_reserve(), limits.MIN_SLIPPAGE_RESERVE)
+
+        with mock.patch.dict(os.environ, clear=True):
+            self.assertGreaterEqual(settings.slippage_reserve(), limits.MIN_SLIPPAGE_RESERVE)
 
     def test_file_with_bom_and_quotes(self) -> None:
         """Метка BOM в начале файла и кавычки вокруг значения разбираются правильно"""
