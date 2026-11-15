@@ -23,6 +23,58 @@ def coin(symbol: str) -> Instrument:
     return Instrument(symbol, price=D("1"), min_qty=D("1"), qty_step=D("1"), min_notional=D("5"))
 
 
+class PositiveTests(unittest.TestCase):
+    """Числа из командной строки"""
+
+    def test_only_positive_finite_numbers_pass(self) -> None:
+        """Ноль, отрицательные, NaN, бесконечность и не числа отклоняются"""
+        self.assertEqual(main_module._positive("0.87"), D("0.87"))
+
+        for bad in ("0", "-1", "nan", "inf", "-inf", "abc"):
+            with self.subTest(bad=bad), self.assertRaises(argparse.ArgumentTypeError):
+                main_module._positive(bad)
+
+
+class CommandTests(unittest.TestCase):
+    """Диспетчер команд демо-счёта"""
+
+    def run_main(self, *argv: str) -> None:
+        """Запускает `main` с аргументами, вывод и кодировку не трогает
+
+        Args:
+            argv: Аргументы командной строки после имени программы
+        """
+        with mock.patch("sys.argv", ["purser", *argv]), mock.patch("builtins.print"), \
+             mock.patch.object(main_module.sys.stdout, "reconfigure"), mock.patch.object(main_module.sys.stderr, "reconfigure"):
+            main_module.main()
+
+    def test_refused_order_exits_with_code_one(self) -> None:
+        """Отказ риск-слоя или владельца даёт код выхода 1, чтобы его видел скрипт"""
+        with mock.patch.object(main_module.execution, "open_position", return_value=False), self.assertRaises(SystemExit) as caught:
+            self.run_main("order", "XRPUSDT", "long", "--stop", "0.87")
+
+        self.assertEqual(caught.exception.code, 1)
+
+    def test_fund_records_deposit_only_after_exchange_accepted(self) -> None:
+        """Пополнение пишется в пик только после успеха биржи: при отказе пик не меняется"""
+        with mock.patch.object(main_module.bybit_private, "add_demo_funds", side_effect=RuntimeError("отказ")), \
+             mock.patch.object(main_module.state, "add_deposit") as add_deposit, self.assertRaises(RuntimeError):
+            self.run_main("fund", "41")
+
+        add_deposit.assert_not_called()
+
+    def test_deposit_and_bad_amounts(self) -> None:
+        """`deposit` пишет сумму в пик, а ноль и отрицательные суммы отклоняются разбором аргументов"""
+        with mock.patch.object(main_module.state, "add_deposit") as add_deposit:
+            self.run_main("deposit", "50")
+
+        add_deposit.assert_called_once_with(D("50"))
+
+        for argv in (("deposit", "0"), ("deposit", "-5"), ("fund", "0"), ("fund", "-5"), ("fund", "1.5")):
+            with self.subTest(argv=argv), mock.patch("sys.stderr"), self.assertRaises(SystemExit):
+                self.run_main(*argv)
+
+
 class SymbolsTests(unittest.TestCase):
     """Выбор контрактов для докачки"""
 

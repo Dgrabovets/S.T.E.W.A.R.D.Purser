@@ -116,6 +116,92 @@ def base_url() -> str:
     return _text("PURSER_BASE_URL", "https://api.bybit.com").rstrip("/")
 
 
+def trade_url() -> str:
+    """Адрес API для приватных запросов: баланс, позиции, ордера
+
+    Returns:
+        Адрес без слеша в конце, по умолчанию демо-счёт
+    """
+    return _text("PURSER_TRADE_URL", "https://api-demo.bybit.com").rstrip("/")
+
+
+def _secret(name: str) -> str:
+    """Секрет из окружения, значение никуда не печатается
+
+    Args:
+        name: Имя переменной окружения
+
+    Returns:
+        Значение секрета
+
+    Raises:
+        ValueError: Переменная не задана или в значении недопустимые символы
+    """
+    value = _text(name, "")
+    if not value:
+        raise ValueError(f"{name}: не задано, впишите значение в .env")
+
+    # само значение в сообщении не называется: оно секрет. Пробелы и служебные символы испортили бы заголовок запроса
+    if not value.isascii() or not value.isprintable() or " " in value:
+        raise ValueError(f"{name}: допустимы только печатные символы ASCII без пробелов")
+
+    return value
+
+
+def api_key() -> str:
+    """Ключ API Bybit
+
+    Returns:
+        Ключ из `PURSER_API_KEY`
+    """
+    return _secret("PURSER_API_KEY")
+
+
+def api_secret() -> str:
+    """Секрет API Bybit
+
+    Returns:
+        Секрет из `PURSER_API_SECRET`
+    """
+    return _secret("PURSER_API_SECRET")
+
+
+def state_dir() -> Path:
+    """Папка состояния: пик депозита и флаг kill-switch, отдельно от истории, чтобы очистка истории их не трогала
+
+    Returns:
+        Путь к папке, относительный считается от корня проекта
+    """
+    return ROOT / _text("PURSER_STATE_DIR", "state")
+
+
+def slippage_reserve() -> Decimal:
+    """Запас на проскальзывание и комиссии при расчёте размера
+
+    Returns:
+        Доля от цены: 0.003 это 0,3%, вход считается хуже рыночной цены на эту долю
+    """
+    return _decimal("PURSER_SLIPPAGE_RESERVE", "0.003", Decimal(0))
+
+
+def reconcile_attempts() -> int:
+    """Сколько раз проверять позицию на бирже после ордера или закрытия
+
+    Returns:
+        Число проверок, не меньше 1
+    """
+    return _integer("PURSER_RECONCILE_ATTEMPTS", "5", 1)
+
+
+def reconcile_pause_seconds() -> int:
+    """Пауза между проверками позиции на бирже
+
+    Returns:
+        Секунды
+    """
+    return _integer("PURSER_RECONCILE_PAUSE_SECONDS", "1", 0)
+
+
 def attempts() -> int:
     """Сколько раз пробовать запрос к бирже при временной ошибке
 
