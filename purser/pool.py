@@ -52,8 +52,8 @@ def report(pool: list[Instrument], now_ms: int) -> str:
     lines = [f"{'Контракт':<16}{'Оборот 24ч, млн':>16}{'Спред, %':>10}{'Финанс., %':>12}{'Лет':>6}{'Шаг, USDT':>11}{'Торговать':>11}"]
 
     for item in pool:
-        years = Decimal(now_ms - item.launch_ms) / MS_PER_DAY / DAYS_PER_YEAR
         lines.append(f"{item.symbol:<16}{item.turnover_24h / MILLION:>16.0f}{item.spread * PERCENT:>10.4f}{item.funding_rate * PERCENT:>12.4f}"
-                     f"{years:>6.1f}{item.qty_step * item.price:>11.2f}{'да' if tradable(item) else 'нет':>11}")
+                     f"{Decimal(now_ms - item.launch_ms) / MS_PER_DAY / DAYS_PER_YEAR:>6.1f}{item.qty_step * item.price:>11.2f}"
+                     f"{'да' if tradable(item) else 'нет':>11}")
 
     return "\n".join(lines)

@@ -136,6 +136,19 @@ class RetryTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "bad"):
                 bybit_public._get("/v5/market/kline")
 
+    def test_get_does_not_retry_params_error(self) -> None:
+        """Ошибка параметров (нет такого символа) не повторяется: она не исправится"""
+        bad = mock.MagicMock()
+        bad.__enter__.side_effect = lambda: io.BytesIO(b'{"retCode": 10001, "retMsg": "Symbol Is Invalid"}')
+
+        with mock.patch.object(bybit_public, "urlopen", return_value=bad) as urlopen, \
+             mock.patch.object(bybit_public.time, "sleep") as sleep, mock.patch.dict(os.environ, {"PURSER_ATTEMPTS": "3"}):
+            with self.assertRaisesRegex(RuntimeError, "10001 Symbol Is Invalid"):
+                bybit_public._get("/v5/market/kline")
+
+        self.assertEqual(urlopen.call_count, 1)
+        sleep.assert_not_called()
+
     def test_get_retries_temporary_failure_then_raises(self) -> None:
         """Запрос пробуется `settings.attempts()` раз, потом исключение уходит наверх"""
         with mock.patch.object(bybit_public, "urlopen", side_effect=OSError("сеть")) as urlopen, \
@@ -179,6 +192,15 @@ class StoreTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / "x.csv"
             path.write_text("time_ms,rate\n100,1\nабв\n", encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "повреждена"):
+                store.sync(path, store.FUNDING_HEADER, lambda start, end: [], since=0, now=1)
+
+    def test_row_with_missing_columns_is_reported_even_if_time_is_readable(self) -> None:
+        """Строка, оборванная после первого столбца, считается повреждённой, хотя время в ней читается"""
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "x.csv"
+            path.write_text("time_ms,rate\n100,1\n200\n", encoding="utf-8")
 
             with self.assertRaisesRegex(ValueError, "повреждена"):
                 store.sync(path, store.FUNDING_HEADER, lambda start, end: [], since=0, now=1)

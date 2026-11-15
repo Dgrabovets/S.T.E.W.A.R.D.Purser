@@ -61,6 +61,17 @@ class SettingsTests(unittest.TestCase):
 
             self.assertEqual(settings.attempts(), 5)
 
+    def test_file_export_and_inline_comment(self) -> None:
+        """Префикс `export` и комментарий в конце строки отбрасываются, в кавычках `#` остаётся"""
+        with tempfile.TemporaryDirectory() as folder, mock.patch.dict(os.environ, clear=True):
+            path = Path(folder) / ".env"
+            path.write_text("export PURSER_ATTEMPTS=4 # четыре\nPURSER_BASE_URL='https://x.test/#a'\n", encoding="utf-8")
+
+            settings.load_env_file(path)
+
+            self.assertEqual(settings.attempts(), 4)
+            self.assertEqual(settings.base_url(), "https://x.test/#a")
+
     def test_data_dir_is_relative_to_project_root(self) -> None:
         """Относительная папка истории считается от корня проекта, а не от места запуска"""
         with mock.patch.dict(os.environ, {"PURSER_DATA_DIR": "history"}):

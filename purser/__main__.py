@@ -12,6 +12,9 @@ from purser import bybit_public, feasibility, pool, settings, store
 from purser.sizing import Instrument
 from purser.timeunits import MS_PER_DAY, MS_PER_SECOND
 
+# Сколько контрактов показывает отчёт осуществимости, если не указано `--top`
+DEFAULT_TOP = 30
+
 
 def _current_pool(now: int) -> list[Instrument]:
     """Пул монет по текущим данным биржи
@@ -23,6 +26,29 @@ def _current_pool(now: int) -> list[Instrument]:
         Отобранные контракты
     """
     return pool.select(bybit_public.linear_perpetuals(), now)
+
+
+def _symbols(requested: list[str], now: int, parser: argparse.ArgumentParser) -> list[str]:
+    """Контракты для докачки: названные явно, а без названий текущий пул
+
+    Args:
+        requested: Названия из командной строки
+        now: Текущее время, мс
+        parser: Разборщик аргументов, через него сообщается об ошибке
+
+    Returns:
+        Названия в верхнем регистре
+    """
+    if not requested:
+        return [item.symbol for item in _current_pool(now)]
+
+    symbols = [symbol.upper() for symbol in requested]
+    known = {item.symbol for item in bybit_public.linear_perpetuals()}
+    unknown = [symbol for symbol in symbols if symbol not in known]
+    if unknown:
+        parser.error(f"нет таких торгуемых бессрочных USDT-контрактов: {', '.join(unknown)}")
+
+    return symbols
 
 
 def _fetch(symbols: list[str], now: int) -> None:
@@ -52,15 +78,17 @@ def main() -> None:
 
     check = commands.add_parser("feasibility", help="на каких монетах риск исполним при данном депозите")
     check.add_argument("--equity", type=Decimal, required=True, help="депозит в USDT")
-    check.add_argument("--top", type=int, default=30, help="сколько самых ликвидных контрактов показать")
+    check.add_argument("--top", type=int, default=DEFAULT_TOP, help="сколько самых ликвидных контрактов показать")
 
     commands.add_parser("pool", help="пул монет для сводок")
 
     fetch = commands.add_parser("fetch", help="докачать свечи и финансирование в папку истории")
     fetch.add_argument("symbols", nargs="*", help="контракты; по умолчанию текущий пул")
 
-    args = parser.parse_args()
+    # кодировка до разбора аргументов: иначе сообщение об ошибке на кириллице искажается в консоли Windows
     sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+    args = parser.parse_args()
     now = int(time.time() * MS_PER_SECOND)
 
     if args.command == "feasibility":
@@ -68,7 +96,7 @@ def main() -> None:
     elif args.command == "pool":
         print(pool.report(_current_pool(now), now))
     else:
-        _fetch([symbol.upper() for symbol in args.symbols] or [item.symbol for item in _current_pool(now)], now)
+        _fetch(_symbols(args.symbols, now, parser), now)
 
 
 if __name__ == "__main__":

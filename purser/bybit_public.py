@@ -16,6 +16,9 @@ KLINE_LIMIT = 1000
 FUNDING_LIMIT = 200
 INSTRUMENTS_LIMIT = 1000
 
+# Код ошибки Bybit «неверные параметры» (например, нет такого символа): повтор запроса его не исправит
+PARAMS_ERROR_CODE = 10001
+
 
 def _get(path: str, **params: str) -> dict:
     """Один публичный GET-запрос к Bybit с повтором при временной ошибке
@@ -28,7 +31,7 @@ def _get(path: str, **params: str) -> dict:
         Поле `result` ответа биржи
 
     Raises:
-        RuntimeError: Биржа вернула ошибку на всех попытках
+        RuntimeError: Биржа вернула ошибку на всех попытках, а при неверных параметрах сразу, без повторов
         OSError: Сеть недоступна или таймаут на всех попытках
         ValueError: Ответ не разобрать как JSON на всех попытках
         HTTPException: Ответ оборван на всех попытках
@@ -44,7 +47,9 @@ def _get(path: str, **params: str) -> dict:
             if payload["retCode"] == 0:
                 return payload["result"]
 
-            error = RuntimeError(f"Bybit {path}: {payload['retMsg']}")
+            error = RuntimeError(f"Bybit {path}: {payload['retCode']} {payload['retMsg']}")
+            if payload["retCode"] == PARAMS_ERROR_CODE:
+                raise error
         except (OSError, ValueError, HTTPException) as exception:  # сеть и таймаут, битый JSON, оборванный ответ
             error = exception
 
@@ -75,15 +80,16 @@ def linear_perpetuals() -> list[Instrument]:
                 continue
 
             lot = row["lotSizeFilter"]
-            price, bid, ask = Decimal(ticker["lastPrice"]), ticker.get("bid1Price"), ticker.get("ask1Price")
+            price = Decimal(ticker["lastPrice"])
+            bid, ask = Decimal(ticker.get("bid1Price") or "0"), Decimal(ticker.get("ask1Price") or "0")
             instruments.append(Instrument(symbol=row["symbol"],
                                           price=price,
                                           min_qty=Decimal(lot["minOrderQty"]),
                                           qty_step=Decimal(lot["qtyStep"]),
                                           min_notional=Decimal(lot.get("minNotionalValue") or "0"),
                                           turnover_24h=Decimal(ticker["turnover24h"] or "0"),
-                                          # пустой стакан считаем непригодным: спред 100%
-                                          spread=(Decimal(ask) - Decimal(bid)) / price if bid and ask else Decimal(1),
+                                          # спред к середине стакана; пустой стакан считаем непригодным: спред 100%
+                                          spread=(ask - bid) * 2 / (ask + bid) if bid > 0 and ask > 0 else Decimal(1),
                                           funding_rate=Decimal(ticker.get("fundingRate") or "0"),
                                           launch_ms=int(row["launchTime"])))
 

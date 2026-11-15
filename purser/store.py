@@ -19,7 +19,7 @@ def _last_time(path: Path) -> int | None:
         Время в мс или None, если файла нет или в нём только заголовок
 
     Raises:
-        ValueError: Последняя строка не начинается с числа, например запись оборвалась
+        ValueError: Последняя строка неполная или не начинается с числа, например запись оборвалась
     """
     if not path.exists():
         return None
@@ -27,8 +27,15 @@ def _last_time(path: Path) -> int | None:
     with path.open(newline="", encoding="utf-8") as file:
         rows = [row for row in csv.reader(file) if row]
 
+    if len(rows) < 2:
+        return None
+
     try:
-        return int(rows[-1][0]) if len(rows) > 1 else None
+        # неполная строка: запись оборвалась, даже если первый столбец ещё читается
+        if len(rows[-1]) != len(rows[0]):
+            raise ValueError
+
+        return int(rows[-1][0])
     except ValueError:
         raise ValueError(f"{path}: последняя строка повреждена, удалите её и запустите докачку снова") from None
 
