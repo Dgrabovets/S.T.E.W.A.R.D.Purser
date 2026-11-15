@@ -1,12 +1,12 @@
-<p align="center"><img src="assets/icon.svg" width="120" alt="Steward.Purser"></p>
+<p align="center"><img src="assets/icon.svg" width="120" alt="S.T.E.W.A.R.D.Purser"></p>
 
-# Steward.Purser
+# S.T.E.W.A.R.D.Purser
 
 Ядро на Python для торговли бессрочными USDT-контрактами на Bybit.
-Система считает сигнал, решение Long или Short принимает владелец, ордер со стопом отправляет утилита.
-Purser значит «казначей». Проект продолжает линейку Steward.
+Система считает сигнал и размер позиции. Long или Short выбирает владелец, а утилита отправляет ордер со стопом.
+Purser значит «казначей». Проект входит в линейку Steward.
 
-> Не инвестиционная рекомендация. Проект ничего не обещает по доходности. Преимущество стратегий не доказано.
+> Это не инвестиционная рекомендация. Доходность не обещана, а преимущество какой-либо стратегии не доказано.
 
 ## Принципы
 
@@ -49,8 +49,8 @@ python -m purser feasibility --equity 40.63
 
 ## Структура
 
-- `purser/limits.py` — лимиты риска.
-- `purser/sizing.py` — размер позиции, чистые функции на `Decimal`.
-- `purser/bybit_public.py` — публичные данные Bybit без ключей.
-- `purser/feasibility.py` — отчёт шага 0.
-- `tests/` — тесты.
+- `purser/limits.py`: лимиты риска.
+- `purser/sizing.py`: размер позиции, чистые функции на `Decimal`.
+- `purser/bybit_public.py`: публичные данные Bybit без ключей.
+- `purser/feasibility.py`: отчёт шага 0.
+- `tests/`: тесты.

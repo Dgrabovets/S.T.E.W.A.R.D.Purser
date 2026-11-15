@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru"><meta charset="utf-8"><title>Варианты иконки</title>
+<style>
+body{font:14px system-ui;margin:24px;background:#f4f4f5;color:#111}
+.row{display:flex;gap:24px;flex-wrap:wrap}
+.card{background:#fff;border-radius:12px;padding:16px;width:260px}
+.pair{display:flex;gap:12px;align-items:center;margin:8px 0}
+.dark{--bg:#14213d;--fg:#e5e5e5;--ac:#fca311}
+.light{--bg:#f4efe6;--fg:#14213d;--ac:#c2410c}
+svg{display:block}
+</style>
+<svg width="0" height="0" style="position:absolute">
+<!-- A: мешочек казначея со свечами -->
+<symbol id="A" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="56" fill="var(--bg)"/>
+<path d="M96 78 L112 52 H144 L160 78 Z" fill="var(--ac)"/>
+<path d="M92 84 H164 C198 112 208 152 190 182 C178 202 150 208 128 208 C106 208 78 202 66 182 C48 152 58 112 92 84 Z" fill="var(--ac)"/>
+<rect x="96" y="76" width="64" height="12" rx="6" fill="var(--fg)"/>
+<g stroke="var(--bg)" stroke-width="6" stroke-linecap="round"><line x1="106" y1="122" x2="106" y2="184"/><line x1="128" y1="108" x2="128" y2="174"/><line x1="150" y1="130" x2="150" y2="190"/></g>
+<rect x="98" y="138" width="16" height="32" rx="3" fill="var(--bg)"/><rect x="120" y="124" width="16" height="36" rx="3" fill="var(--fg)"/><rect x="142" y="146" width="16" height="30" rx="3" fill="var(--bg)"/>
+</symbol>
+<!-- B: щит со свечой (риск-слой) -->
+<symbol id="B" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="56" fill="var(--bg)"/>
+<path d="M128 40 L196 64 V122 C196 164 168 196 128 216 C88 196 60 164 60 122 V64 Z" fill="none" stroke="var(--ac)" stroke-width="12" stroke-linejoin="round"/>
+<line x1="128" y1="82" x2="128" y2="176" stroke="var(--fg)" stroke-width="8" stroke-linecap="round"/>
+<rect x="110" y="104" width="36" height="46" rx="5" fill="var(--fg)"/>
+</symbol>
+<!-- C: свечи над линией стопа -->
+<symbol id="C" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="56" fill="var(--bg)"/>
+<g stroke="var(--fg)" stroke-width="8" stroke-linecap="round"><line x1="84" y1="70" x2="84" y2="170"/><line x1="128" y1="56" x2="128" y2="150"/><line x1="172" y1="84" x2="172" y2="176"/></g>
+<rect x="68" y="98" width="32" height="48" rx="5" fill="var(--fg)"/><rect x="112" y="80" width="32" height="50" rx="5" fill="var(--ac)"/><rect x="156" y="112" width="32" height="42" rx="5" fill="var(--fg)"/>
+<line x1="44" y1="196" x2="212" y2="196" stroke="var(--ac)" stroke-width="10" stroke-linecap="round" stroke-dasharray="22 14"/>
+</symbol>
+<!-- D: монограмма P, чаша буквы это свеча -->
+<symbol id="D" viewBox="0 0 256 256">
+<rect width="256" height="256" rx="56" fill="var(--bg)"/>
+<line x1="100" y1="52" x2="100" y2="208" stroke="var(--fg)" stroke-width="22" stroke-linecap="round"/>
+<path d="M100 66 H146 C176 66 190 84 190 108 C190 132 176 150 146 150 H100" fill="none" stroke="var(--ac)" stroke-width="22" stroke-linejoin="round"/>
+<line x1="150" y1="40" x2="150" y2="176" stroke="var(--fg)" stroke-width="6" stroke-linecap="round"/>
+</symbol>
+</svg>
+<h2>Варианты иконки S.T.E.W.A.R.D.Purser</h2>
+<div class="row" id="r"></div>
+<script>
+const names={A:'A. Мешочек казначея',B:'B. Щит риска',C:'C. Свечи и линия стопа',D:'D. Монограмма P'};
+r.innerHTML=Object.entries(names).map(([k,n])=>`<div class="card"><b>${n}</b>`+
+['dark','light'].map(t=>`<div class="pair ${t}"><svg width="128" height="128"><use href="#${k}"/></svg><svg width="32" height="32"><use href="#${k}"/></svg><svg width="16" height="16"><use href="#${k}"/></svg></div>`).join('')+'</div>').join('');
+</script>
+</html>
