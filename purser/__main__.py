@@ -1,6 +1,6 @@
-"""Командная строка: проверка осуществимости, пул монет и докачка истории
+"""Командная строка: проверка осуществимости, пул монет, докачка и проверка истории
 
-Запуск: `python -m purser feasibility --equity 40.63`, `python -m purser pool`, `python -m purser fetch`
+Запуск: `python -m purser feasibility --equity 40.63`, `python -m purser pool`, `python -m purser fetch`, `python -m purser check`
 """
 
 import argparse
@@ -8,7 +8,7 @@ import sys
 import time
 from decimal import Decimal
 
-from purser import bybit_public, feasibility, pool, settings, store
+from purser import bybit_public, feasibility, pool, quality, settings, store
 from purser.sizing import Instrument
 from purser.timeunits import MS_PER_DAY, MS_PER_SECOND
 
@@ -82,6 +82,9 @@ def main() -> None:
 
     commands.add_parser("pool", help="пул монет для сводок")
 
+    audit = commands.add_parser("check", help="проверить качество скачанной истории: пропуски, дубли, аномальные свечи, обрыв данных")
+    audit.add_argument("symbols", nargs="*", help="контракты; по умолчанию все, что есть в папке истории")
+
     fetch = commands.add_parser("fetch", help="докачать свечи и финансирование в папку истории")
     fetch.add_argument("symbols", nargs="*", help="контракты; по умолчанию текущий пул")
 
@@ -93,6 +96,9 @@ def main() -> None:
 
     if args.command == "feasibility":
         print(feasibility.report(bybit_public.linear_perpetuals(), args.equity, args.top))
+    elif args.command == "check":
+        print(quality.report(settings.data_dir(), [symbol.upper() for symbol in args.symbols] or quality.stored_symbols(settings.data_dir()),
+                             settings.intervals(), settings.max_move(), now))
     elif args.command == "pool":
         print(pool.report(_current_pool(now), now))
     else:

@@ -53,6 +53,7 @@ Purser значит «казначей». Проект входит в лине�
 | `PURSER_POOL_SIZE` | `10` | Монет в пуле |
 | `PURSER_MIN_HISTORY_DAYS` | `730` | Моложе стольких суток монета в пул не идёт |
 | `PURSER_HISTORY_DAYS` | `730` | За сколько суток качаем историю |
+| `PURSER_MAX_MOVE` | `0.25` | Движение цены за свечу, выше которого проверка истории отмечает аномалию |
 | `PURSER_MAX_SPREAD` | `0.0005` | Наибольший спред, доля от цены |
 | `PURSER_MAX_STEP_USDT` | `1` | Наибольший шаг лота для пометки «можно торговать», USDT |
 
@@ -65,6 +66,7 @@ python -m unittest discover tests
 python -m purser feasibility --equity 40.63
 python -m purser pool
 python -m purser fetch
+python -m purser check
 ```
 
 `pool` печатает сводку по 10 монетам. `fetch` докачивает свечи (1 и 4 часа) и финансирование за два года в `data/`, папка в репозиторий не попадает.
@@ -77,5 +79,6 @@ python -m purser fetch
 - `purser/feasibility.py`: отчёт шага 0.
 - `purser/pool.py`: отбор пула и сводка.
 - `purser/store.py`: история в CSV с докачкой.
+- `purser/quality.py`: проверка истории (пропуски, дубли, аномалии, обрыв данных).
 - `purser/settings.py`: настройки из окружения и `.env`.
 - `tests/`: тесты.

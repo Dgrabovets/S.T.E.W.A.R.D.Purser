@@ -197,6 +197,15 @@ def history_days() -> int:
     return _integer("PURSER_HISTORY_DAYS", "730", 1)
 
 
+def max_move() -> Decimal:
+    """Наибольшее правдоподобное движение цены за одну свечу, выше проверка качества отмечает аномалию
+
+    Returns:
+        Доля от цены: 0.25 это 25%
+    """
+    return _decimal("PURSER_MAX_MOVE", "0.25", Decimal(0))
+
+
 def max_spread() -> Decimal:
     """Наибольший спред монеты в пуле
 
