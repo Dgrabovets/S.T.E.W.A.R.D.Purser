@@ -1,4 +1,4 @@
-"""Шаг 0: на каких монетах утверждённый риск вообще исполним при данном депозите."""
+"""Шаг 0: на каких монетах утверждённый риск исполним при данном депозите"""
 
 from decimal import Decimal
 
@@ -7,10 +7,20 @@ from purser.sizing import Instrument, min_order_qty
 
 
 def report(instruments: list[Instrument], equity: Decimal, top: int) -> str:
-    """Таблица по самым ликвидным контрактам: минимальный ордер и проходит ли он под потолок позиции."""
+    """Таблица по самым ликвидным контрактам: минимальный ордер и проходит ли он под потолок позиции
+
+    Args:
+        instruments: Все контракты
+        equity: Депозит, USDT
+        top: Сколько самых ликвидных показать
+
+    Returns:
+        Текст таблицы для печати
+    """
     risk_usdt = equity * limits.RISK_PER_TRADE
     lines = [f"Депозит {equity} USDT, риск на сделку {risk_usdt:.2f} USDT ({limits.RISK_PER_TRADE:.1%})",
-             f"Потолок позиции: {equity * limits.LEVERAGE_START:.2f} USDT без плеча, {equity * limits.LEVERAGE_CAP:.2f} USDT при {limits.LEVERAGE_CAP}x",
+             f"Потолок позиции: {equity * limits.LEVERAGE_START:.2f} USDT без плеча, "
+             f"{equity * limits.LEVERAGE_CAP:.2f} USDT при {limits.LEVERAGE_CAP}x",
              "",
              f"{'Контракт':<16}{'Оборот 24ч, млн':>16}{'Мин. ордер, USDT':>18}{'Шаг, USDT':>12}{'1x':>5}{f'{limits.LEVERAGE_CAP}x':>7}"]
 
