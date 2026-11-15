@@ -1,16 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Steward.Purser">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="S.T.E.W.A.R.D.Purser">
   <rect width="256" height="256" rx="56" fill="#14213d"/>
-  <!-- мешочек казначея -->
-  <path d="M96 78 L112 52 H144 L160 78 Z" fill="#fca311"/>
-  <path d="M92 84 H164 C198 112 208 152 190 182 C178 202 150 208 128 208 C106 208 78 202 66 182 C48 152 58 112 92 84 Z" fill="#fca311"/>
-  <rect x="96" y="76" width="64" height="12" rx="6" fill="#e5e5e5"/>
-  <!-- свечи графика внутри мешочка -->
-  <g stroke="#14213d" stroke-width="6" stroke-linecap="round">
-    <line x1="106" y1="122" x2="106" y2="184"/>
-    <line x1="128" y1="108" x2="128" y2="174"/>
-    <line x1="150" y1="130" x2="150" y2="190"/>
-  </g>
-  <rect x="98" y="138" width="16" height="32" rx="3" fill="#14213d"/>
-  <rect x="120" y="124" width="16" height="36" rx="3" fill="#e5e5e5"/>
-  <rect x="142" y="146" width="16" height="30" rx="3" fill="#14213d"/>
+  <!-- щит: риск-слой -->
+  <path d="M128 40 L196 64 V122 C196 164 168 196 128 216 C88 196 60 164 60 122 V64 Z" fill="none" stroke="#fca311" stroke-width="12" stroke-linejoin="round"/>
+  <!-- свеча графика -->
+  <line x1="128" y1="82" x2="128" y2="176" stroke="#e5e5e5" stroke-width="8" stroke-linecap="round"/>
+  <rect x="110" y="104" width="36" height="46" rx="5" fill="#e5e5e5"/>
 </svg>
